@@ -1,0 +1,60 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.*.local
+.env.test
+
+# Build / output
+dist/
+build/
+out/
+coverage/
+.cache/
+
+# Lock files (if you intentionally want them ignored, uncomment)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+
+# Python (if present)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.envrc
+.venv/
+pip-wheel-metadata/
+.pytest_cache/
+
+# Logs and temp
+logs/
+*.log
+*.tmp
+*.swp
+*~
+.project
+
+# Docker
+docker-compose.override.yml
+*.dockerignore
+
+# Misc
+coverage/
+lcov-report/
