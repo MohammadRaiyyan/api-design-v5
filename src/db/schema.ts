@@ -1,87 +1,102 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	integer,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+	varchar,
+} from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import z, { email } from "zod";
 
-
 export const users = pgTable("users", {
-    id: uuid().primaryKey().defaultRandom(),
-    email: varchar("email", { length: 255 }).notNull().unique(),
-    username: varchar("username", { length: 100 }).notNull().unique(),
-    password: varchar("password", { length: 255 }).notNull(),
-    firstName: varchar("first_name", { length: 50 }),
-    lastName: varchar("last_name", { length: 50 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	id: uuid().primaryKey().defaultRandom(),
+	email: varchar("email", { length: 255 }).notNull().unique(),
+	username: varchar("username", { length: 100 }).notNull().unique(),
+	password: varchar("password", { length: 255 }).notNull(),
+	firstName: varchar("first_name", { length: 50 }),
+	lastName: varchar("last_name", { length: 50 }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const habits = pgTable("habits", {
-    id: uuid().primaryKey().defaultRandom(),
-    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 100 }).notNull(),
-    description: text("description"),
-    frequency: varchar("frequency", { length: 20 }).notNull(),
-    targetCount: integer("target_count").notNull().default(1),
-    isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	id: uuid().primaryKey().defaultRandom(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	name: varchar("name", { length: 100 }).notNull(),
+	description: text("description"),
+	frequency: varchar("frequency", { length: 20 }).notNull(),
+	targetCount: integer("target_count").notNull().default(1),
+	isActive: boolean("is_active").notNull().default(true),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const entries = pgTable("entries", {
-    id: uuid().primaryKey().defaultRandom(),
-    habitId: uuid("habit_id").notNull().references(() => habits.id, { onDelete: "cascade" }),
-    completionDate: timestamp("completion_date").defaultNow().notNull(),
-    note: text("note"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+	id: uuid().primaryKey().defaultRandom(),
+	habitId: uuid("habit_id")
+		.notNull()
+		.references(() => habits.id, { onDelete: "cascade" }),
+	completionDate: timestamp("completion_date").defaultNow().notNull(),
+	note: text("note"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const tags = pgTable("tags", {
-    id: uuid().primaryKey().defaultRandom(),
-    name: varchar("name", { length: 50 }).notNull().unique(),
-    color: varchar("color", { length: 7 }).default("#6b7280"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	id: uuid().primaryKey().defaultRandom(),
+	name: varchar("name", { length: 50 }).notNull().unique(),
+	color: varchar("color", { length: 7 }).default("#6b7280"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const habitTags = pgTable("habitTags", {
-    habitId: uuid("habit_id").notNull().references(() => habits.id, { onDelete: "cascade" }),
-    tagId: uuid("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+	habitId: uuid("habit_id")
+		.notNull()
+		.references(() => habits.id, { onDelete: "cascade" }),
+	tagId: uuid("tag_id")
+		.notNull()
+		.references(() => tags.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const userRelations = relations(users, ({ many }) => ({
-    habits: many(habits),
+	habits: many(habits),
 }));
 
 export const habitRelations = relations(habits, ({ one, many }) => ({
-    user: one(users, {
-        fields: [habits.userId],
-        references: [users.id],
-    }),
-    entries: many(entries),
-    habitTags: many(habitTags),
+	user: one(users, {
+		fields: [habits.userId],
+		references: [users.id],
+	}),
+	entries: many(entries),
+	habitTags: many(habitTags),
 }));
 
 export const entriesRelations = relations(entries, ({ one }) => ({
-    habit: one(habits, {
-        fields: [entries.habitId],
-        references: [habits.id],
-    }),
+	habit: one(habits, {
+		fields: [entries.habitId],
+		references: [habits.id],
+	}),
 }));
 
 export const tagRelations = relations(tags, ({ many }) => ({
-    habitTags: many(habitTags),
+	habitTags: many(habitTags),
 }));
 export const habitTagRelations = relations(habitTags, ({ one }) => ({
-    habit: one(habits, {
-        fields: [habitTags.habitId],
-        references: [habits.id],
-    }),
-    tag: one(tags, {
-        fields: [habitTags.tagId],
-        references: [tags.id],
-    }),
+	habit: one(habits, {
+		fields: [habitTags.habitId],
+		references: [habits.id],
+	}),
+	tag: one(tags, {
+		fields: [habitTags.tagId],
+		references: [tags.id],
+	}),
 }));
 
 export type User = typeof users.$inferSelect;
@@ -94,12 +109,14 @@ export type HabitTag = typeof habitTags.$inferSelect;
 
 // User zod schemas
 export const insertUserSchema = createInsertSchema(users).extend({
-    email: email().min(1, "Email is required"),
-    password: z.string().min(8, "Password must be at least 8 characters long")
-        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-        .regex(/[0-9]/, "Password must contain at least one number")
-        .regex(/[\W_]/, "Password must contain at least one special character"),
+	email: email().min(1, "Email is required"),
+	password: z
+		.string()
+		.min(8, "Password must be at least 8 characters long")
+		.regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+		.regex(/[a-z]/, "Password must contain at least one lowercase letter")
+		.regex(/[0-9]/, "Password must contain at least one number")
+		.regex(/[\W_]/, "Password must contain at least one special character"),
 });
 export const selectUserSchema = createSelectSchema(users);
 
@@ -118,4 +135,3 @@ export const selectHabitSchema = createSelectSchema(habits);
 // // HabitTag zod schemas
 // export const insertHabitTagSchema = createInsertSchema(habitTags);
 // export const selectHabitTagSchema = createSelectSchema(habitTags);
-

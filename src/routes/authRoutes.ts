@@ -3,10 +3,9 @@ import { login, register } from "../controller/authControllers.ts";
 import { insertUserSchema } from "../db/schema.ts";
 import { validateBody } from "../middleware/validation.ts";
 
-
 const loginSchema = insertUserSchema.pick({
-    email: true,
-    password: true,
+	email: true,
+	password: true,
 });
 
 const router = Router();

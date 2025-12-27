@@ -4,19 +4,18 @@ import { Pool } from "pg";
 import { env, isProd } from "../../env.ts";
 import * as schema from "./schema.ts";
 
-
 function createPool(): Pool {
-    return new Pool({
-        connectionString: env.DATABASE_URL,
-    });
+	return new Pool({
+		connectionString: env.DATABASE_URL,
+	});
 }
 
 let client: Pool;
 
 if (isProd()) {
-    client = createPool();
+	client = createPool();
 } else {
-    client = remember("dbPool", createPool);
+	client = remember("dbPool", createPool);
 }
 
 export const db = drizzle({ client, schema });

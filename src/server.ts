@@ -13,14 +13,15 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev", {
-    skip: () => isTest()
-}));
+app.use(
+	morgan("dev", {
+		skip: () => isTest(),
+	}),
+);
 
-
-app.use("/api/auth", authRoutes)
-app.use("/api/users", userRoutes)
-app.use("/api/habits", habitRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/habits", habitRoutes);
 
 export { app };
 export default app;
